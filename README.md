@@ -127,24 +127,7 @@ claude.orig         # 启动原版未 patch 的 Claude Code
 shadowcode          # 显式调用 ShadowCode（同 claude）
 ```
 
-### 配置
-
-```
-~/.shadowcode/provider.json    API 配置（baseURL、key、model、timeout）
-~/.shadowcode/features.json    Feature flag 覆盖
-```
-
-支持的环境变量（在 `provider.json` 中配置）：
-
-```json
-{
-  "apiKey": "",
-  "baseURL": "https://api.anthropic.com",
-  "model": "",
-  "smallModel": "",
-  "timeoutMs": 3000000
-}
-```
+配置仍然沿用 Claude Code 官方的 `~/.claude/settings.json`，无需额外设置。
 
 ---
 

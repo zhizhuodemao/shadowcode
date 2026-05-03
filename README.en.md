@@ -127,24 +127,7 @@ claude.orig         # Start original unpatched Claude Code
 shadowcode          # Explicit ShadowCode invocation (same as claude)
 ```
 
-### Configuration
-
-```
-~/.shadowcode/provider.json    API config (baseURL, key, model, timeout)
-~/.shadowcode/features.json    Feature flag overrides
-```
-
-`provider.json` schema:
-
-```json
-{
-  "apiKey": "",
-  "baseURL": "https://api.anthropic.com",
-  "model": "",
-  "smallModel": "",
-  "timeoutMs": 3000000
-}
-```
+Configuration continues to use Claude Code's official `~/.claude/settings.json` — no extra setup required.
 
 ---
 
