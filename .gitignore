@@ -1,0 +1,10 @@
+# Runtime / temp
+verify-logs/
+output/
+.DS_Store
+*.bak
+node_modules/
+
+# Python
+__pycache__/
+*.pyc

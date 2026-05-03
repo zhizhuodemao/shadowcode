@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<title>Logo 颜色选择器</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #1a1a2e; color: #eee; font-family: 'SF Mono', 'Fira Code', monospace; padding: 40px; }
+  h1 { text-align: center; margin-bottom: 10px; font-size: 24px; }
+  .sub { text-align: center; color: #888; margin-bottom: 40px; font-size: 14px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 24px; max-width: 1200px; margin: 0 auto; }
+  .card {
+    background: #0f0f23;
+    border: 2px solid #333;
+    border-radius: 12px;
+    padding: 24px;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+  }
+  .card:hover { border-color: #666; transform: translateY(-2px); }
+  .card.selected { border-color: var(--c); box-shadow: 0 0 20px var(--c-glow); }
+  .card-name { font-size: 16px; font-weight: bold; margin-bottom: 4px; }
+  .card-rgb { font-size: 12px; color: #666; margin-bottom: 16px; }
+  .banner {
+    background: #000;
+    border-radius: 8px;
+    padding: 16px;
+    font-size: 13px;
+    line-height: 1.6;
+    white-space: pre;
+  }
+  .logo { font-weight: bold; }
+  .dim { color: #666; }
+  .result {
+    max-width: 1200px;
+    margin: 40px auto 0;
+    background: #0f0f23;
+    border: 2px solid #333;
+    border-radius: 12px;
+    padding: 24px;
+    display: none;
+  }
+  .result.show { display: block; }
+  .result h2 { margin-bottom: 16px; font-size: 18px; }
+  .result pre {
+    background: #000;
+    padding: 16px;
+    border-radius: 8px;
+    font-size: 12px;
+    overflow-x: auto;
+    line-height: 1.5;
+    color: #0f0;
+  }
+  .btn {
+    display: inline-block;
+    margin-top: 16px;
+    padding: 8px 20px;
+    background: #333;
+    border: 1px solid #555;
+    color: #eee;
+    border-radius: 6px;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 13px;
+  }
+  .btn:hover { background: #444; }
+</style>
+</head>
+<body>
+
+<h1>Claude Code Logo 颜色选择器</h1>
+<p class="sub">点击选择你喜欢的风格，底部会生成 patch 配置</p>
+
+<div class="grid" id="grid"></div>
+
+<div class="result" id="result">
+  <h2>你选择的颜色方案</h2>
+  <pre id="output"></pre>
+  <button class="btn" onclick="copyOutput()">复制 Patch 配置</button>
+  <span id="copied" style="color:#0f0;margin-left:12px;display:none">已复制</span>
+</div>
+
+<script>
+const themes = [
+  {
+    name: "Matrix 黑客绿",
+    dark: "rgb(0,255,65)", light: "rgb(0,200,50)",
+    shimmerDark: "rgb(100,255,140)", shimmerLight: "rgb(0,230,60)",
+    ansi: "greenBright", hex: "#00ff41"
+  },
+  {
+    name: "赛博朋克紫",
+    dark: "rgb(168,85,247)", light: "rgb(139,92,246)",
+    shimmerDark: "rgb(196,140,255)", shimmerLight: "rgb(168,85,247)",
+    ansi: "magentaBright", hex: "#a855f7"
+  },
+  {
+    name: "电光蓝",
+    dark: "rgb(59,130,246)", light: "rgb(37,99,235)",
+    shimmerDark: "rgb(120,170,255)", shimmerLight: "rgb(59,130,246)",
+    ansi: "blueBright", hex: "#3b82f6"
+  },
+  {
+    name: "血色红",
+    dark: "rgb(239,68,68)", light: "rgb(220,38,38)",
+    shimmerDark: "rgb(255,120,120)", shimmerLight: "rgb(239,68,68)",
+    ansi: "redBright", hex: "#ef4444"
+  },
+  {
+    name: "琥珀终端",
+    dark: "rgb(245,158,11)", light: "rgb(217,119,6)",
+    shimmerDark: "rgb(255,190,80)", shimmerLight: "rgb(245,158,11)",
+    ansi: "yellowBright", hex: "#f59e0b"
+  },
+  {
+    name: "幽灵青",
+    dark: "rgb(6,182,212)", light: "rgb(8,145,178)",
+    shimmerDark: "rgb(80,220,240)", shimmerLight: "rgb(6,182,212)",
+    ansi: "cyanBright", hex: "#06b6d4"
+  },
+  {
+    name: "毒液绿 (ClawGod 默认)",
+    dark: "rgb(34,197,94)", light: "rgb(22,163,74)",
+    shimmerDark: "rgb(74,222,128)", shimmerLight: "rgb(34,197,94)",
+    ansi: "greenBright", hex: "#22c55e"
+  },
+  {
+    name: "霓虹粉",
+    dark: "rgb(236,72,153)", light: "rgb(219,39,119)",
+    shimmerDark: "rgb(255,130,190)", shimmerLight: "rgb(236,72,153)",
+    ansi: "magentaBright", hex: "#ec4899"
+  },
+  {
+    name: "原版橙 (Claude 官方)",
+    dark: "rgb(215,119,87)", light: "rgb(255,153,51)",
+    shimmerDark: "rgb(235,159,127)", shimmerLight: "rgb(255,183,101)",
+    ansi: "redBright", hex: "#da7756"
+  },
+  {
+    name: "纯白极简",
+    dark: "rgb(255,255,255)", light: "rgb(200,200,200)",
+    shimmerDark: "rgb(255,255,255)", shimmerLight: "rgb(220,220,220)",
+    ansi: "whiteBright", hex: "#ffffff"
+  },
+];
+
+const grid = document.getElementById('grid');
+let selected = null;
+
+themes.forEach((t, i) => {
+  const card = document.createElement('div');
+  card.className = 'card';
+  card.style.setProperty('--c', t.dark);
+  card.style.setProperty('--c-glow', t.dark.replace('rgb', 'rgba').replace(')', ',0.3)'));
+  card.innerHTML = `
+    <div class="card-name" style="color:${t.dark}">${t.name}</div>
+    <div class="card-rgb">${t.dark} · ${t.hex}</div>
+    <div class="banner"><span class="logo" style="color:${t.dark}">▗ ▗   ▖ ▖</span>  Claude Code v2.1.126
+<span class="logo" style="color:${t.shimmerDark}">           </span> <span class="dim">Opus 4.7 · API Usage Billing</span>
+  <span class="logo" style="color:${t.dark}">▘▘ ▝▝</span>    <span class="dim">/Users/chen</span></div>
+  `;
+  card.onclick = () => {
+    document.querySelectorAll('.card').forEach(c => c.classList.remove('selected'));
+    card.classList.add('selected');
+    selected = t;
+    showResult(t);
+  };
+  grid.appendChild(card);
+});
+
+function showResult(t) {
+  const el = document.getElementById('result');
+  el.classList.add('show');
+  document.getElementById('output').textContent = `// ── ${t.name} 主题 ──
+
+{
+  name: 'Logo + brand color (RGB dark)',
+  pattern: /clawd_body:"rgb\\(215,119,87\\)"/g,
+  replacer: () => 'clawd_body:"${t.dark}"',
+},
+{
+  name: 'Logo + brand color (ANSI)',
+  pattern: /clawd_body:"ansi:redBright"/g,
+  replacer: () => 'clawd_body:"ansi:${t.ansi}"',
+},
+{
+  name: 'Theme claude color (dark)',
+  pattern: /claude:"rgb\\(215,119,87\\)"/g,
+  replacer: () => 'claude:"${t.dark}"',
+},
+{
+  name: 'Theme claude color (light)',
+  pattern: /claude:"rgb\\(255,153,51\\)"/g,
+  replacer: () => 'claude:"${t.light}"',
+},
+{
+  name: 'Shimmer dark',
+  pattern: /claudeShimmer:"rgb\\(2[34]5,1[45]9,1[12]7\\)"/g,
+  replacer: () => 'claudeShimmer:"${t.shimmerDark}"',
+},
+{
+  name: 'Shimmer light',
+  pattern: /claudeShimmer:"rgb\\(255,183,101\\)"/g,
+  replacer: () => 'claudeShimmer:"${t.shimmerLight}"',
+},
+{
+  name: 'Hex brand color',
+  pattern: /#da7756/g,
+  replacer: () => '${t.hex}',
+},`;
+}
+
+function copyOutput() {
+  const text = document.getElementById('output').textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    const el = document.getElementById('copied');
+    el.style.display = 'inline';
+    setTimeout(() => el.style.display = 'none', 2000);
+  });
+}
+</script>
+</body>
+</html>
