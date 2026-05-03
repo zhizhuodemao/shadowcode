@@ -84,16 +84,16 @@
 ### macOS / Linux
 
 ```bash
-git clone <仓库地址> ~/Documents/claude-patch
-cd ~/Documents/claude-patch
+git clone https://github.com/zhizhuodemao/shadowcode.git ~/shadowcode
+cd ~/shadowcode
 bash install-custom.sh
 ```
 
 ### Windows
 
 ```powershell
-git clone <仓库地址> $env:USERPROFILE\Documents\claude-patch
-cd $env:USERPROFILE\Documents\claude-patch
+git clone https://github.com/zhizhuodemao/shadowcode.git $env:USERPROFILE\shadowcode
+cd $env:USERPROFILE\shadowcode
 powershell -ExecutionPolicy Bypass -File install-custom.ps1
 ```
 
